@@ -2,14 +2,19 @@
 <html>
 
 <head>
-  <title>Laravel 10 Task List App</title>
+    <title>Laravel 10 Task List App</title>
 </head>
 
 <body>
-  <h1 style="color: aquamarine">@yield('title')</h1>
-  <div>
-    @yield('content')
-  </div>
+    <h1 style="color: aquamarine">@yield('title')</h1>
+    <div>
+        @if (session()->has('sucess'))
+            <div>
+                <p style="color: green">{{ session()->get('sucess') }}</p>
+            </div>
+        @endif
+        @yield('content')
+    </div>
 </body>
 
 </html>
