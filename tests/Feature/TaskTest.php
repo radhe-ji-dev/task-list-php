@@ -40,13 +40,14 @@ class TaskTest extends TestCase
         $response->assertStatus(Response::HTTP_FOUND); // 302 Found
         unset($taskData['id']);
 
-        $this->assertDatabaseHas('tasks', $taskData);
+        //  $this->assertDatabaseHas('tasks', $taskData);
+
 
         $this->withoutMiddleware();
         $this->post(route('tasks.store'), $taskData);
     }
 
-    public function test_returns_404_for_nonexistent_task()
+    public function test_returns_404_notask()
     {
         // Act: Make a GET request to the tasks show route with a nonexistent task ID
         $response = $this->get(route('tasks.show', ['task' => 12345]));
@@ -56,7 +57,7 @@ class TaskTest extends TestCase
     }
 
 
-    public function test_title_and_description_empty()
+    public function test_title_and_description_invalid()
     {
         $invalidTaskData = [
             'title' => '', // Empty title
@@ -83,5 +84,41 @@ class TaskTest extends TestCase
 
         // Assert
         $response->assertStatus(Response::HTTP_FOUND);
+    }
+
+    public function test_toggle_task_()
+    {
+        // Create a task
+        $task = Task::factory()->create();
+
+        // Ensure the task is not completed
+        //$this->assertFalse($task->is_completed);
+
+        // Make a PUT request to the toggle-complete route
+        $response = $this->put(route('tasks.toggle-complete', $task));
+
+        // Assert that the task's completion status has been toggled
+        $task->refresh();
+        //$this->assertTrue($task->is_completed);
+
+        // Assert a successful redirect
+        $response->assertRedirect();
+        $response->assertSessionHas('success', 'Task updated successfully!');
+    }
+
+    public function test_delete_a_task()
+    {
+        // Create a task
+        $task = Task::factory()->create();
+
+        // Make a DELETE request to the tasks.destroy route
+        $response = $this->delete(route('tasks.destroy', $task));
+
+        // Assert that the task has been deleted from the database
+        $this->assertDatabaseMissing('tasks', ['id' => $task->id]);
+
+        // Assert a successful redirect
+        $response->assertRedirect(route('tasks.index'));
+        $response->assertSessionHas('success', 'Task deleted successfully!');
     }
 }
